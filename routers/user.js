@@ -1,55 +1,16 @@
 const router = require("express").Router();
 
-let users = [
-  { id: 1, name: "Mg Mg", age: 21 },
-  { id: 2, name: "Hla Hla", age: 28 },
-  { id: 3, name: "Zaw Zaw", age: 11 },
-];
+const {get , getAll, post, patch, drop} = require('../controller/userC')
 
-router.get("/", (req, res) => {
-  res.json(users);
-});
 
-router.get("/:id", (req, res) => {
-  let id = req.params.id;
-  let user = users.find((ea) => ea.id == id);
-  if (user) {
-    res.json(user);
-  } else {
-    res.json({ msg: "user not found" });
-  }
-});
+router.get("/", getAll);
 
-router.post("/", (req, res) => {
-  let id = req.body.id;
-  let name = req.body.name;
-  let age = req.body.age;
+router.get("/:id", get);
 
-  let user = {
-    id,
-    name,
-    age,
-  };
-  users.push(user);
-  res.json(users);
-});
+router.post("/", post);
 
-router.patch("/:id", (req, res) => {
-  let id = req.params.id;
-  let name = req.body.name;
-  let editUser = users.find((ea) => ea.id == id);
-  if (editUser) {
-    editUser.name = name;
-    res.json(users);
-  } else {
-    res.json({ msg: "User no exit" });
-  }
-});
+router.patch("/:id", patch);
 
-router.delete("/:id", (req, res) => {
-  let id = req.params.id;
-  users = users.filter((ea) => ea.id != id);
-  res.json(users);
-});
+router.delete("/:id", drop);
 
 module.exports = router;

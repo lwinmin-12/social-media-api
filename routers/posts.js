@@ -1,18 +1,11 @@
 const router = require("express").Router();
+const { all, get, post, patch, drop } = require("../controller/postC");
 
-router.get("/", (req, res) => {
-  res.json({ msg: "All post are Here" });
-});
+router.get("/", all);
 
-router.post("/", (req, res) => {
-  res.json(req.body);
-});
+router.post("/", post);
 
-router
-  .route("/:id")
-  .get((req, res) => res.json({ msg: "Post id is " + req.params.id }))
-  .patch((req, res) => res.json({ msg: "patch id is " + req.params.id }));
-
+router.route("/:id").get(get).patch(patch).delete(drop);
 // router.get("/:id", (req, res) => {
 //   let id = req.params.id;req.params.id;
 //   res.json({ msg: "Post id is " + id });
