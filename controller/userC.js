@@ -1,53 +1,57 @@
-let users = [
-    { id: 1, name: "Mg Mg", age: 21 },
-    { id: 2, name: "Hla Hla", age: 28 },
-    { id: 3, name: "Zaw Zaw", age: 11 },
-  ];
+const DB = require("../dbS/userS");
+const Helper = require("../utils/helper");
 
 const getAll = async (req, res, next) => {
-    res.json(users);
+  let users = await DB.find();
+  Helper.fMsg(res, "All Users", users);
+  // res.status(200).json({
+  //   con: true,
+  //   msg: "All Users",
+  //   result: users,
+  // });
 };
 
 const get = async (req, res, next) => {
-    let id = req.params.id;
-    let user = users.find((ea) => ea.id == id);
-    if (user) {
-      res.json(user);
-    } else {
-      res.json({ msg: "user not found" });
-    }
+  let id = req.params.id;
+  let user = await DB.findById(id);
+  Helper.fMsg(res, "One user", user);
+  // res.status(200).json({
+  //   con: true,
+  //   msg: "One Users",
+  //   result: [],
+  // });
 };
 
 const post = async (req, res, next) => {
-    let id = req.body.id;
-    let name = req.body.name;
-    let age = req.body.age;
-  
-    let user = {
-      id,
-      name,
-      age,
-    };
-    users.push(user);
-    res.json(users);
+  let saveUser = new DB(req.body);
+  let result = await saveUser.save();
+  Helper.fMsg(res, "User Added", result);
 };
 
 const patch = async (req, res, next) => {
-    let id = req.params.id;
-  let name = req.body.name;
-  let editUser = users.find((ea) => ea.id == id);
-  if (editUser) {
-    editUser.name = name;
-    res.json(users);
+  // req id
+  let id = req.params.id;
+  // data
+  let user = await DB.findById(id);
+  let update = req.body;
+  if (user) {
+    await DB.findByIdAndUpdate(user._id, update);
+    let result = await DB.findById(user._id);
+    Helper.fMsg(res, "Updated", result);
   } else {
-    res.json({ msg: "User no exit" });
+    next(new Error("Error , No User with that id"));
   }
 };
 
 const drop = async (req, res, next) => {
-    let id = req.params.id;
-    users = users.filter((ea) => ea.id != id);
-    res.json(users);
+  let id = req.params.id;
+  let user = await DB.findById(id);
+  if (user) {
+    await DB.findByIdAndDelete(id);
+    Helper.fMsg(res, "Deleted");
+  } else {
+    next(new Error("Error , No User with that id"));
+  }
 };
 
 module.exports = {
@@ -55,6 +59,5 @@ module.exports = {
   getAll,
   post,
   patch,
-  drop
-
+  drop,
 };
