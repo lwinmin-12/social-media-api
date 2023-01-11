@@ -2,9 +2,12 @@ require("dotenv").config();
 const express = require("express");
 const app = express();
 const fileUpload = require("express-fileupload");
+const { fMsg } = require("./utils/helper");
+const path = require('path')
 
 app.use(express.json());
 app.use(fileUpload());
+app.use('/upload' , express.static(path.join(__dirname , 'upload')))
 
 const mongoose = require("mongoose");
 mongoose.connect(
@@ -13,6 +16,7 @@ mongoose.connect(
 
 const userRoute = require("./routers/user");
 const postRoute = require("./routers/posts");
+const { saveImg, saveImgs, delImg } = require("./utils/gallary");
 
 const franky = (req, res, next) => {
   console.log(req.complete);
@@ -35,18 +39,19 @@ const isAdmin = (req, res, next) => {
   }
 };
 
-const saveImg = (req, res, next) => {
-  // console.log(req.files);
-  let file = req.files.file;
-  let fileName = new Date().valueOf() + "_" + file.name;
-  file.mv(`upload/${fileName}`);
-  req.imageName = fileName;
-  next()
-};
+// app.post("/gallery", async (req, res, next) => {
+//   await delImg(req.body.name);
+//   res.json({ msg: "file deleted" });
+// });
 
-app.post("/gallery", saveImg, (req, res, next) => {
-  res.json({ "msg": "file Uploaded", "fileName": req.imageName });
+app.post("/gallery", saveImg, async (req, res, next) => {
+  fMsg(res, "File Uploaded");
 });
+
+// app.post("/gallery", saveImgs, async (req, res, next) => {
+//   fMsg(res, "All Of Files Are Uploaded");
+// });
+
 app.use("/users", islogin, isAdmin, userRoute);
 // app.use("/users", userRoute);
 app.use("/posts", postRoute);
