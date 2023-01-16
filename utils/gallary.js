@@ -4,7 +4,7 @@ const saveImg = (req, res, next) => {
   let file = req.files.file;
   let fileName = new Date().valueOf() + "_" + file.name;
   file.mv(`upload/${fileName}`);
-  req.imageName = fileName;
+  req.body['image'] = fileName
   next();
 };
 
@@ -17,7 +17,6 @@ const saveImgs = (req, res, next) => {
     fileNames.push(fileName);
   });
   req.body["images"] = fileNames;
-  //  console.log(fileNames)
   next();
 };
 const delImg = async (fileName) => {

@@ -1,19 +1,24 @@
 const router = require("express").Router();
-const { all, get, post, patch, drop } = require("../controller/postC");
+const {
+  all,
+  get,
+  post,
+  patch,
+  drop,
+  getCatId,
+  getByUser,
+} = require("../controller/postC");
+const { validateToken, validateBody } = require("../utils/validator");
+const { PostSchema } = require("../utils/schema");
+const { saveImg } = require("../utils/gallary");
 
 router.get("/", all);
 
-router.post("/", post);
+router.post("/", validateToken, saveImg, validateBody(PostSchema), post);
 
-router.route("/:id").get(get).patch(patch).delete(drop);
-// router.get("/:id", (req, res) => {
-//   let id = req.params.id;req.params.id;
-//   res.json({ msg: "Post id is " + id });
-// });
+router.route("/:id").get(get).patch(validateToken, patch).delete(drop);
 
-//   router.patch("/:id", (req, res) => {
-//     let id = req.params.id;
-//     res.json({ msg: "patch id is " + id });
-//   });
+router.get("/bycat/:id", getCatId);
+router.get("/byuser/:id", getByUser);
 
 module.exports = router;

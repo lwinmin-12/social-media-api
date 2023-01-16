@@ -1,63 +1,51 @@
 const DB = require("../dbS/userS");
-const Helper = require("../utils/helper");
+const { fMsg, encode, comprass , makeToken } = require("../utils/helper");
 
-const getAll = async (req, res, next) => {
-  let users = await DB.find();
-  Helper.fMsg(res, "All Users", users);
-  // res.status(200).json({
-  //   con: true,
-  //   msg: "All Users",
-  //   result: users,
-  // });
-};
-
-const get = async (req, res, next) => {
-  let id = req.params.id;
-  let user = await DB.findById(id);
-  Helper.fMsg(res, "One user", user);
-  // res.status(200).json({
-  //   con: true,
-  //   msg: "One Users",
-  //   result: [],
-  // });
-};
-
-const post = async (req, res, next) => {
-  let saveUser = new DB(req.body);
-  let result = await saveUser.save();
-  Helper.fMsg(res, "User Added", result);
-};
-
-const patch = async (req, res, next) => {
-  // req id
-  let id = req.params.id;
-  // data
-  let user = await DB.findById(id);
-  let update = req.body;
-  if (user) {
-    await DB.findByIdAndUpdate(user._id, update);
-    let result = await DB.findById(user._id);
-    Helper.fMsg(res, "Updated", result);
+const login = async (req, res, next) => {
+  // fMsg(res, "login successful", req.body);
+  // console.log(req.body.password);
+  // console.log(password);
+  // console.log('work')
+  let phoneUser = await DB.findOne({ phone: req.body.phone }).select("-__v");
+  if (phoneUser) {
+    if (comprass(req.body.password, phoneUser.password)) {
+      // let token = makeToken(phoneUser.toObject())
+      // phoneUser.to = token
+      let user = phoneUser.toObject()
+      delete user.password
+      user.token = makeToken(user)
+      // console.log(token)
+      fMsg(res, "login Success", user);
+    } else {
+      next(new Error("Creditial Error"));
+    }
   } else {
-    next(new Error("Error , No User with that id"));
+    next(new Error("Creditial Error"));user
   }
 };
-
-const drop = async (req, res, next) => {
-  let id = req.params.id;
-  let user = await DB.findById(id);
-  if (user) {
-    await DB.findByIdAndDelete(id);
-    Helper.fMsg(res, "Deleted");
-  } else {
-    next(new Error("Error , No User with that id"));
+const register = async (req, res, next) => {
+  let nameUser = await DB.findOne({ name: req.body.name });
+  if (nameUser) {
+    next(new Error("User name is existed"));
+    return;
   }
+  let emailUser = await DB.findOne({ email: req.body.email });
+  if (emailUser) {
+    next(new Error("Email name is existed"));
+    return;
+  }
+  let phone = await DB.findOne({ phone: req.body.phone });
+  if (phone) {
+    next(new Error("Phone name is existed"));
+    return;
+  }
+  req.body.password = encode(req.body["password"]);
+  let result = await new DB(req.body).save();
+
+  fMsg(res, "New user created", result);
 };
 
 module.exports = {
-  get,
-  getAll,
-  post,
-  patch,
-  drop,
+  login,
+  register,
 };

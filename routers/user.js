@@ -1,16 +1,9 @@
 const router = require("express").Router();
+const { login, register } = require("../controller/userC");
+const { validateBody } = require("../utils/validator");
+const { RegisterSchema } = require("../utils/schema");
 
-const {get , getAll, post, patch, drop} = require('../controller/userC')
-
-
-router.get("/", getAll);
-
-router.get("/:id", get);
-
-router.post("/", post);
-
-router.patch("/:id", patch);
-
-router.delete("/:id", drop);
+router.post("/", login);
+router.post("/register", validateBody(RegisterSchema), register);
 
 module.exports = router;
