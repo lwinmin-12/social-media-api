@@ -1,4 +1,5 @@
 const DB = require("../dbS/postS");
+const commentDB = require("../dbS/comment");
 const { fMsg } = require("../utils/helper");
 
 const all = async (req, res) => {
@@ -7,7 +8,10 @@ const all = async (req, res) => {
 };
 const get = async (req, res) => {
   let id = req.params.id;
-  let result = await DB.findById(id).populate("user");
+  let result = await DB.findById(id).populate("user cat", "-__v -_id -create -password");
+  let comments = await commentDB.find({ postId: result._id });
+  result = result.toObject();
+  result["comments"] = comments;
   fMsg(res, "each post", result);
 };
 const post = async (req, res) => {
@@ -44,17 +48,47 @@ const drop = async (req, res, next) => {
 
 const getCatId = async (req, res, next) => {
   let id = req.params.id;
-  
-    let result = await DB.find({ cat: id }).populate("user");
+
+  let result = await DB.find({ cat: id }).populate("user");
   fMsg(res, "all Same Cat", result);
-  
 };
 
-const getByUser = async ( req , res , next) =>{
+const getByUser = async (req, res, next) => {
   let id = req.params.id;
-  let result = await DB.find({user : id})
-  fMsg(res , 'all post by user' , result)
-}
+  let result = await DB.find({ user: id });
+  fMsg(res, "all post by user", result);
+};
+const getByTag = async (req, res, next) => {
+  let id = req.params.id;
+
+  let result = await DB.find({ tag: id });
+  fMsg(res, "all post by tag", result);
+};
+const paginate = async (req, res, next) => {
+  let page = req.params.page;
+  page = page == 1 ? 0 : page - 1;
+  let limit = Number(process.env.POST_LIMIT);
+  let skipCount = limit * page;
+  let posts = await DB.find().skip(skipCount).limit(limit);
+  fMsg(res, "Paginated Post", posts);
+};
+
+const toggleLike = async (req, res, next) => {
+  let id = req.params.id;
+  let post = await DB.findById(id);
+  // console.log(post);
+  if (post) {
+    let page = req.params.page;
+    if (page == 1) {
+      post.like = post.like + 1;
+    } else {
+      post.like = post.like - 1;
+    }
+    await DB.findByIdAndUpdate(id, post);
+    let result = await DB.findById(id);
+    fMsg(res, "post is liked", result);
+  }
+};
 
 module.exports = {
   all,
@@ -63,5 +97,8 @@ module.exports = {
   patch,
   drop,
   getCatId,
-  getByUser
+  getByUser,
+  paginate,
+  getByTag,
+  toggleLike,
 };

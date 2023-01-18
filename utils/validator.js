@@ -9,6 +9,7 @@ module.exports = {
         next(new Error(result.error.details[0].message));
       } else {
         next();
+        // console.log("wk");
       }
     };
   },
@@ -18,6 +19,7 @@ module.exports = {
       let obj = {};
       obj[`${name}`] = req.params[`${name}`];
       let result = schema.validate(obj);
+      // console.log(schema , obj)
       if (result.error) {
         next(new Error(result.error.details[0].message));
       } else {

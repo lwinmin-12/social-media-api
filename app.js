@@ -11,17 +11,19 @@ app.use(fileUpload());
 app.use("/upload", express.static(path.join(__dirname, "upload")));
 
 const mongoose = require("mongoose");
-mongoose.connect(
-  "mongodb+srv://lmo:asdffdsa@cluster0.cuqab5p.mongodb.net/?retryWrites=true&w=majority"
-);
+mongoose.connect(process.env.DATA_BASE);
 
 const userRoute = require("./routers/user");
 const postRoute = require("./routers/posts");
 const catsRoute = require("./routers/cats");
+const tagRoute = require("./routers/tag");
+const commentRoute = require("./routers/comment");
 
 app.use("/category", catsRoute);
 app.use("/users", userRoute);
 app.use("/posts", postRoute);
+app.use("/tag", tagRoute);
+app.use("/comment", commentRoute);
 
 app.use((err, req, res, next) => {
   //   console.log(err);
